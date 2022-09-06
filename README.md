@@ -7,7 +7,7 @@ Federated learning is an emerging learning paradigm where multiple clients colla
 
 We propose FedTP, a novel Transformer-based federated learning framework with personalized self-attention to better handle data heterogeneity among clients. FedTP learns a personalized self-attention layer for each client while the parameters of the other layers are shared among the clients. Additionally, the server learns a hypernetwork that generates projection matrices in the selfattention layers to produce client-wise queries, keys, and values. This hypernetwork is an effective way of sharing parameters across clients while maintaining the flexibility of a personalized Transformer. Notably, FedTP offers a convenient environment for performing a range of image and language tasks using the same federated network architecture –all of which benefits from Transformer personalization. Extensive experiments on standard personalized federated learning benchmarks with different non-IID data settings show that FedTP yields state-of-the-art performance.
 
-<img src="figures/pipeline.png" width="315" height="200" /><br/>
+<img src="figures/pipeline.png" width="630" height="400" /><br/>
 
 
 ## Requirements
