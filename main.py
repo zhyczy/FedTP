@@ -1302,16 +1302,16 @@ if __name__ == '__main__':
         for round in range(test_round):
             logger.info("in comm round: %d" %round)
 
-            if args.definite_selection == False:
-                if round == 0:
-                    if args.dataset!="shakespeare":
-                        args.epochs=1300
-                    else:
-                        args.epochs=200
-                else:
-                    args.epochs=5 
-            logger.info("epochs: %d" %args.epochs)
-            logger.info("test_round: %d" %test_round)
+            # if args.definite_selection == False:
+            #     if round == 0:
+            #         if args.dataset!="shakespeare":
+            #             args.epochs=1300
+            #         else:
+            #             args.epochs=200
+            #     else:
+            #         args.epochs=5 
+            # logger.info("epochs: %d" %args.epochs)
+            # logger.info("test_round: %d" %test_round)
 
             if args.dataset == 'shakespeare':
                 local_train_net_per(nets, arr, args, train_dl_global, test_dl_global, logger, device=device)
