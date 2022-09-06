@@ -25,7 +25,7 @@ Additionally, To run FedTP+KNN, FAISS should be installed. Instructions for the 
 ## Datasets
 
 We provide three federated benchmark datasets spanning image classification task (CIFAR10 and CIFAR100) 
-and language modelling(Shakespeare).
+and language modeling(Shakespeare).
 
 
 For CIFAR10 and CIFAR100 dataset, download and unzip data under 'data' file catalog. 
