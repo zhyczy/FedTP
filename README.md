@@ -10,14 +10,46 @@ We propose FedTP, a novel Transformer-based federated learning framework with pe
 <img src="figures/pipeline.png" width="315" height="200" /><br/>
 
 
-## Installation
+## Requirements
+
+To install requirements:
+
+```setup
+pip install -r requirements.txt
+```
+
+Additionally, To run FedTP+KNN, FAISS should be installed. Instructions for the installation of FAISS can be found
+[here](https://github.com/facebookresearch/faiss/blob/main/INSTALL.md)
+
+
+## Datasets
+
+We provide three federated benchmark datasets spanning image classification task (CIFAR10 and CIFAR100) 
+and language modelling(Shakespeare).
+
+
+For CIFAR10 and CIFAR100 dataset, download and unzip data under 'data' file catalog. 
+Or simply run any algorithms with CIFAR10/CIFAR100 dataset, the program will download data automatically.
+
+Shakespeare dataset was naturally partitioned by assigning
+all lines from the same characters to the same client. 
+See the `README.md` files in `data/shakespeare` 
+for instructions on generating data before running experiments.
+
+The following table summarizes the datasets and models
+
+|Dataset         | Task |  Model |
+| ------------------  |  ------|------- |
+| CIFAR10   |     Image classification        |      vit/cnn/cnn-b |
+| CIFAR100    |     Image classification         |      vit/cnn/cnn-b  |
+| Shakespeare |     Next character prediction        |      transformer/Stacked LSTM    |
 
 
 
 ## Usage
 Here is one example to run our FedTP:
 ```
-python experiments.py --model=vit \
+python main.py --model=vit \
     --dataset=cifar10 \
     --alg=FedTP \
     --lr=0.01 \
@@ -37,45 +69,49 @@ python experiments.py --model=vit \
     --init_seed=0
 ```
 
+Three demos for each dataset are provided in scripts folder.
+
 | Parameter                      | Description                                 |
 | ----------------------------- | ---------------------------------------- |
 | `model` | The model architecture. Options: `cnn`, `cnn-b`, `vit`, `lstm`, `transformer`. Default = `vit`. |
 | `dataset`      | Dataset to use. Options: `cifar10`, `cifar100`, `shakespeare`. Default = `cifar10`. |
-| `alg` | Basic training algorithm. Options: `fedavg`, `fedprox`, `FedTP`, `pFedHN`, `pfedMe`, `fedPer`, `fedBN`, `fedRod`, `fedproto`, `local_training`. Default = `FedTP`. |
+| `alg` | Basic training algorithm. Basic Options: `fedavg`, `fedprox`, `FedTP`, `pFedHN`, `pfedMe`, `fedPer`, `fedBN`, `fedRod`, `fedproto`, `local_training`. Extension: `Personalized-T`, `FedTP-Per`, `FedTP-Rod`. Default = `FedTP`. |
 | `lr` | Learning rate for the local models, default = `0.01`. |
 | `batch-size` | Batch size, default = `64`. |
-| `epochs` | Number of local training epochs, default = `5`. |
-| `n_parties` | Number of parties, default = `2`. |
+| `epochs` | Number of local training epochs, default = `1`. |
+| `n_parties` | Number of parties, default = `10`. |
 | `mu` | The proximal term parameter for FedProx, default = `1`. |
 | `rho` | The parameter controlling the momentum SGD, default = `0`. |
 | `comm_round`    | Number of communication rounds to use, default = `50`. |
-| `partition`    | The partition way. Options: `homo`, `noniid-labeldir`, `noniid-labeldir100`, `noniid-labeluni`, `iid-label100`. Default = `noniid-labeldir` |
+| `eval_step`    | Test interval during communication, default = `1`. |
+| `test_round`    | Round beginning to test, default = `2`. |
+| `partition`    | The partition way. Options: `noniid-labeldir`, `noniid-labeldir100`, `noniid-labeluni`, `iid-label100`, `homo`. Default = `noniid-labeldir` |
 | `beta` | The concentration parameter of the Dirichlet distribution for heterogeneous partition, default = `0.5`. |
 | `device` | Specify the device to run the program, default = `cuda:0`. |
 | `datadir` | The path of the dataset, default = `./data/`. |
 | `logdir` | The path to store the logs, default = `./logs/`. |
-| `noise` | Maximum variance of Gaussian noise we add to local party, default = `0`. |
-| `sample` | Ratio of parties that participate in each communication round, default = `1`. |
+| `sample` | Ratio of parties that participate in each communication round, default = `0.1`. |
+| `balanced_soft_max` | Activate this to run FedRod and FedTP-Rod. |
+| `k_neighbor` | Activate this to run FedTP-KNN. |
 | `init_seed` | The initial seed, default = `0`. |
+| `noise` | Maximum variance of Gaussian noise we add to local party, default = `0`. |
+| `noise_type` | Noise type. Use `increasing` to check effect of heterogeneity in Noise-based Feature Imbalance, default = `None`. |
+| `save_model` | Activate this to save model. |
 
 
 
 ## Data Partition Map
-You can call function `get_partition_dict()` in `experiments.py` to access `net_dataidx_map`. `net_dataidx_map` is a dictionary. Its keys are party ID, and the value of each key is a list containing index of data assigned to this party. For our experiments, we usually set `init_seed=0`. When we repeat experiments of some setting, we change `init_seed` to 1 or 2. The default value of `noise` is 0 unless stated. We list the way to get our data partition as follow.
-* **Quantity-based label imbalance**: `partition`=`noniid-#label1`, `noniid-#label2` or `noniid-#label3`
-* **Distribution-based label imbalance**: `partition`=`noniid-labeldir`, `beta`=`0.5` or `0.1`
-* **Noise-based feature imbalance**: `partition`=`homo`, `noise`=`0.1` (actually noise does not affect `net_dataidx_map`)
-* **Synthetic feature imbalance & Real-world feature imbalance**: `partition`=`real`
-* **Quantity Skew**: `partition`=`iid-diff-quantity`, `beta`=`0.5` or `0.1`
-* **IID Setting**: `partition`=`homo`
-* **Mixed skew**: `partition` = `mixed` for mixture of distribution-based label imbalance and quantity skew; `partition` = `noniid-labeldir` and `noise` = `0.1` for mixture of distribution-based label imbalance and noise-based feature imbalance.
+To simulate non-IID scenarios for CIFAR-10/CIFAR-100, we follow two common split designs. You can call function `get_partition_dict()` in `main.py` to access `net_dataidx_map`. `net_dataidx_map` is a dictionary. Its keys are party ID, and the value of each key is a list containing index of data assigned to this party. For our experiments, we usually set `init_seed=0`.  The default value of `noise` is 0 unless stated. We list the way to get our data partition as follow.
+* **Dirichlet Partition**: `partition`=`noniid-labeldir/noniid-label100`. The former is for CIFAR-10 dataset and the later is for CIFAR-100 dataset. `beta` controls degree of data heterogeneity. 
+* **Uniform Partition**: `partition`=`noniid-labeluni`. For CIFAR-10 and CIFAR-100 dataset. 
+
 
 Here is explanation of parameter for function `get_partition_dict()`. 
 
 | Parameter                      | Description                                 |
 | ----------------------------- | ---------------------------------------- |
-| `dataset`      | Dataset to use. Options: `mnist`, `cifar10`, `fmnist`, `svhn`, `generated`, `femnist`, `a9a`, `rcv1`, `covtype`. |
-| `partition`    | Tha partition way. Options: `homo`, `noniid-labeldir`, `noniid-#label1` (or 2, 3, ..., which means the fixed number of labels each party owns), `real`, `iid-diff-quantity` |
+| `dataset`      | Dataset to use. Options: `cifar10`, `cifar100` |
+| `partition`    | Tha partition way. Options: `noniid-labeldir`, `noniid-labeldir100`, `noniid-labeluni`, `iid-label100`, `homo` |
 | `n_parties` | Number of parties. |
 | `init_seed` | The initial seed. |
 | `datadir` | The path of the dataset. |

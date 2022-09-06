@@ -11,7 +11,6 @@ from collections import OrderedDict, defaultdict
 from sklearn.metrics import confusion_matrix
 from torch.utils.data import DataLoader
 
-from model import *
 from datasets import CIFAR10_truncated, CIFAR100_truncated, CharacterDataset
 from math import sqrt
 
@@ -122,8 +121,6 @@ def partition_data(dataset, datadir, partition, n_parties, beta=0.4, logdir=None
             K = 10
         elif dataset == "cifar100":
             K = 100
-        elif dataset in ('celeba', 'covtype', 'a9a', 'rcv1', 'SUSY'):
-            K = 2
         else:
             assert False
             print("Choose Dataset in readme.")
@@ -335,10 +332,7 @@ def partition_data(dataset, datadir, partition, n_parties, beta=0.4, logdir=None
             num = 2
         elif dataset == "cifar100":
             num = 10
-        if dataset in ('celeba', 'covtype', 'a9a', 'rcv1', 'SUSY'):
-            num = 1
-            K = 2
-        elif dataset == 'cifar100':
+        if dataset == 'cifar100':
             K = 100
         elif dataset == 'cifar10':
             K = 10
@@ -555,7 +549,6 @@ def compute_accuracy_fedRod(model, p_head, dataloader, sample_per_class, args, d
         p_head.train()
 
     return correct, total, total_loss/batch_count
-    # return correct/float(total)
 
 
 def compute_accuracy_fedproto(model, global_protos, dataloader, args, device='cpu'):
@@ -1339,7 +1332,6 @@ def get_divided_dataloader(dataset, datadir, train_bs, test_bs, dataidxs_train, 
 def get_spe_dataloaders(dataset, data_dir, batch_size, chunk_len, is_validation=False):
 
     inputs, targets = None, None
-
     train_iterators, val_iterators, test_iterators = [], [], []
 
     for task_id, task_dir in enumerate(os.listdir(data_dir)):
@@ -1374,9 +1366,7 @@ def get_spe_dataloaders(dataset, data_dir, batch_size, chunk_len, is_validation=
 
 def get_spe_loader(dataset, path, batch_size, train, chunk_len=5, inputs=None, targets=None):
 
-    if dataset == "femnist":
-        dataset = SubFEMNIST(path)
-    elif dataset == "shakespeare":
+    if dataset == "shakespeare":
         dataset = CharacterDataset(path, chunk_len=chunk_len)
     else:
         raise NotImplementedError(f"{dataset} not recognized type; possible are {list(LOADER_TYPE.keys())}")

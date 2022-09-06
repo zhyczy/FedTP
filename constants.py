@@ -5,6 +5,10 @@ ALL_STRATEGIES = {
     "random"
 }
 
+EXTENSIONS = {
+    "shakespeare": ".txt"
+}
+
 EMBEDDING_DIM = {
     "cifar10": 1280,
     "cifar100": 1280,

@@ -23,7 +23,7 @@ from models.vit import ViT
 from models.Hypernetworks import ViTHyper, ShakesHyper
 from models.cnn import CNNHyper, CNNTarget, CNN_B
 from models.language_transformer import Transformer
-from model import *
+from models.lstm import NextCharacterLSTM
 from utils import *
 from methods.method import *
 
@@ -73,7 +73,6 @@ def get_args():
     parser.add_argument("--balanced_soft_max", action='store_true')
     parser.add_argument("--client_embed_size", type=int, default=128)
     parser.add_argument('--log_flag', default=True)
-    parser.add_argument('--lambda_value', type=float, default=0.5)
     parser.add_argument('--k_neighbor', action='store_true')
 
     parser.add_argument('--capacity_ratio', type=float, default=1.0)
@@ -202,7 +201,7 @@ def init_personalized_parameters(args, client_number=None):
     elif args.dataset == "shakespeare":
         class_num = 100
 
-    if args.alg == 'Personalized-T' or args.alg == 'protoVit':
+    if args.alg == 'Personalized-T':
         if args.model == 'vit':
             for nndx in range(args.n_parties):
                 kqv_dict = OrderedDict()
@@ -304,7 +303,6 @@ if __name__ == '__main__':
     logging.info("Partition: %s" % args.partition)
     logging.info("Beta: %f" % args.beta)
     logging.info("Sample rate: %f" % args.sample)
-    logging.info("Lambda: %f" % args.lambda_value)
     logging.info("Print Accuracy on training set: %s" % args.train_acc_pre)
     logging.info("Save model: %s" % args.save_model)
     logging.info("Total running round: %s" % args.comm_round)
@@ -334,7 +332,6 @@ if __name__ == '__main__':
     device = torch.device(args.device)
 
     if args.k_neighbor:
-        logging.info("lambda: %f" % args.lambda_value)
         logging.info("Use memory: %s" % args.k_neighbor)
 
     mkdirs(args.logdir)
@@ -369,22 +366,17 @@ if __name__ == '__main__':
     logger.info("Partitioning data")
 
     if args.dataset != 'shakespeare':
-        if args.alg=="local_training":
-            args.test_round=41
+        # if args.alg=="local_training":
+        #     args.test_round=41
         logging.info("Test beginning round: %d" %args.test_round)
         logging.info("Client Number: %d" % args.n_parties)
         X_train, y_train, X_test, y_test, net_dataidx_map_train, net_dataidx_map_test, traindata_cls_counts, testdata_cls_counts = partition_data(
             args.dataset, args.datadir, args.partition, args.n_parties, beta=args.beta, logdir=args.logdir)
 
         n_classes = len(np.unique(y_train))
-
-        train_dl_global, test_dl_global, train_ds_global, test_ds_global = get_dataloader(args.dataset,
-                                                                                            args.datadir,
-                                                                                            args.batch_size,
-                                                                                            32)
+        train_dl_global, test_dl_global, train_ds_global, test_ds_global = get_dataloader(args.dataset, args.datadir, args.batch_size, 32)
 
         logger.info("len train_dl_global: %d"  %len(train_ds_global))
-
         data_size = len(test_ds_global)
 
     else:
@@ -394,10 +386,8 @@ if __name__ == '__main__':
         train_dl_global, val_dl_global, test_dl_global, original_c_num = get_spe_dataloaders(args.dataset, data_dir, args.batch_size, args.chunk_len)
         args.n_parties = len(train_dl_global)
         
-        if args.alg=="local_training":
-            args.test_round=21
-        else:
-            args.test_round = 200
+        # if args.alg=="local_training":
+        #     args.test_round=21
         logging.info("Test beginning round: %d" %args.test_round)
         logger.info("Drop Client Number: %d" %(original_c_num-args.n_parties))
         logger.info("Client Number: %d" % args.n_parties)
