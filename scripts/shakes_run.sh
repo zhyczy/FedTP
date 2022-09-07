@@ -21,7 +21,7 @@ python main.py --model=transformer \
 
 # python main.py --model=lstm\
 #     --dataset=shakespeare \
-#     --alg=fedavg \
+#     --alg=pfedMe \
 #     --lr=0.01 \
 #     --batch-size=64 \
 #     --epochs=1 \
