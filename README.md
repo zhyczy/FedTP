@@ -103,7 +103,7 @@ Three demos for each dataset are provided in scripts folder.
 ## Data Partition Map
 To simulate non-IID scenarios for CIFAR-10/CIFAR-100, we follow two common split designs. You can call function `get_partition_dict()` in `main.py` to access `net_dataidx_map`. `net_dataidx_map` is a dictionary. Its keys are party ID, and the value of each key is a list containing index of data assigned to this party. For our experiments, we usually set `init_seed=0`.  The default value of `noise` is 0 unless stated. We list the way to get our data partition as follow.
 * **Dirichlet Partition**: `partition`=`noniid-labeldir/noniid-labeldir100`. The former is for CIFAR-10 dataset and the later is for CIFAR-100 dataset. `beta` controls degree of data heterogeneity. 
-* **Uniform Partition**: `partition`=`noniid-labeluni`. For CIFAR-10 and CIFAR-100 dataset. 
+* **Pathological Partition**: `partition`=`noniid-labeluni`. For CIFAR-10 and CIFAR-100 dataset. 
 
 
 Here is explanation of parameter for function `get_partition_dict()`. 
