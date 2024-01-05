@@ -68,7 +68,7 @@ def get_args():
     Used for FedTP
     """
     parser.add_argument('--depth', type=int, default=6)
-    parser.add_argument('--hyper_hid', type=int, default=100, help="hypernet hidden dim")
+    parser.add_argument('--hyper_hid', type=int, default=150, help="hypernet hidden dim")
     parser.add_argument("--n-hidden", type=int, default=3, help="num. hidden layers")
     parser.add_argument("--balanced_soft_max", action='store_true')
     parser.add_argument("--client_embed_size", type=int, default=128)
